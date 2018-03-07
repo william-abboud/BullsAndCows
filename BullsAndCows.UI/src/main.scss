@@ -1,0 +1,18 @@
+@import '~normalize.css/normalize.css';
+
+/* ======== Utils ======== */
+@import './sass/utils/variables.scss';
+@import './sass/utils/mixins.scss';
+
+/* ======== Globals ======== */
+@import './sass/global/elements.scss';
+
+/* ======== Components ======== */
+@import './sass/components/site-header.scss';
+
+/* ======== Views ======== */
+@import './sass/views/home.scss';
+@import './sass/views/rules.scss';
+@import './sass/views/ranking.scss';
+@import './sass/views/login.scss';
+@import './sass/views/register.scss';

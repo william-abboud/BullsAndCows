@@ -8,27 +8,27 @@ function Register() {
       <form>
         <div>
           <label htmlFor="username">Username:</label>
-          <input type="text" name="username" />
+          <input type="text" id="username" />
         </div>
 
         <div>
           <label htmlFor="fullName">Full Name:</label>
-          <input type="text" name="fullName" />
+          <input type="text" id="fullName" />
         </div>
 
         <div>
           <label htmlFor="email">Email:</label>
-          <input type="email" name="email" />
+          <input type="email" id="email" />
         </div>
 
         <div>
           <label htmlFor="password">Password:</label>
-          <input type="password" name="password" />
+          <input type="password" id="password" />
         </div>
 
          <div>
           <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input type="password" name="confirmPassword" />
+          <input type="password" id="confirmPassword" />
         </div>
       </form>
     </div>

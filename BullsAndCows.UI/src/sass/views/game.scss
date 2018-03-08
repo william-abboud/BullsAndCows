@@ -1,0 +1,30 @@
+.game-view {
+  padding: 0 40px;
+
+  .player-game-statistics {
+    display: flex;
+    flex-flow: row wrap;
+
+    .human-player {
+      flex: 0 1 49.9%;
+      display: flex;
+      flex-flow: column;
+      justify-content: center;
+      border-right: 1px solid red;
+    }
+
+    .opponent-player {
+      display: flex;
+      flex: 0 1 50%;
+      justify-content: flex-end;
+    }
+  }
+
+  .results {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    margin: 10px 0;
+  }
+}

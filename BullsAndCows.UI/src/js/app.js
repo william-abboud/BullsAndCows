@@ -6,6 +6,7 @@ import Rules from './views/Rules';
 import Ranking from './views/Ranking';
 import Login from './views/Login';
 import Register from './views/Register';
+import Game from './views/Game';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/ranking" component={Ranking} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
+        <Route path="/game" component={Game} />
       </div>
     </Router>
   );

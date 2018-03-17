@@ -1,63 +1,68 @@
-import React from 'react';
+import React, { Component } from 'react';
+import { Redirect } from 'react-router';
+import utils from '../utils';
+import queryString from 'query-string';
 
-function Player() {
-  return (
-    <div className="human-player">
-      <h3>William</h3>
+class SecretNumberForm extends Component {
+  constructor(props) {
+    super(props);
 
-      <form>
+    this.submitSecret = this.submitSecret.bind(this);
+    this.onFormValueChange = this.onFormValueChange.bind(this);
+
+    this.state = {
+      secret: 0
+    };
+  }
+
+  submitSecret(e) {
+    e.preventDefault();
+
+    utils.authorizedRequest(`/api/Players/CreateSecret/${this.state.secret}`, "POST");
+  }
+
+  onFormValueChange({ target }) {
+    this.setState({
+      [target.id]: target.value
+    });
+  }
+
+  render() {
+    const { playerName } = this.props;
+
+    return (
+      <form onSubmit={this.submitSecret}>
         <div>
-          <label htmlFor="secretNumber">Secret Number:</label>
-          <input type="text" id="secretNumber" />
+          <label htmlFor="secret">Secret Number:</label>
+          <input type="text" id="secret" value={this.state.secret} onChange={this.onFormValueChange} />
         </div>
-
-        <div>
-          <label htmlFor="guess">Guess:</label>
-          <input type="text" id="guess" />
-        </div>
-
-        <button>Guess</button>
+        <button type="submit">Submit Secret</button>
       </form>
-
-      <Results />
-      <Results />
-      <Results />
-      <Results />
-      <Results />
-      <Results />
-      <Results />
-    </div>
-  );
+    );
+  }
 }
 
-function OpponentPlayer() {
-  return (
-    <div className="opponent-player">
-      <h3>Computer player</h3>
-    </div>
-  );
-}
+class Game extends Component {
+  constructor(props) {
+    super(props);
 
-function Results() {
-  return (
-    <div className="results">
-      <p>Guess: 1234</p>
-      <p>1 cow and 2 bulls</p>
-    </div>
-  );
-}
+    this.state = {
+      gameId: queryString.parse(this.props.location.search).gameId
+    };
+  }
 
-function Game() {
-  return (
-    <div className="game-view">
-      <h2>Turn: 8</h2>
+  render() {
+    if (!utils.getAccessToken()) {
+      return <Redirect to="/login" />;
+    }
 
-      <div className="player-game-statistics">
-        <Player />
-        <OpponentPlayer />
+    return (
+      <div className="game-view">
+        <h2>Create a secret number:</h2>
+        <SecretNumberForm />
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 export default Game;

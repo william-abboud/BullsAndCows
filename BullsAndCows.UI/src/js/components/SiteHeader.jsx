@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import utils from '../utils';
 
 function SiteHeader() {
   return (
@@ -12,12 +13,18 @@ function SiteHeader() {
         </ul>
       </nav>
 
-      <nav className="login-register-nav">
-        <ul>
-          <li><Link to="/login">Login</Link></li>
-          <li><Link to="/register">Register</Link></li>
-        </ul>
-      </nav>
+      {
+        utils.isLoggedIn()
+          ?
+            <div>{`Welcome ${utils.getUser()} !`}</div>
+          :
+            <nav className="login-register-nav">
+              <ul>
+                <li><Link to="/login">Login</Link></li>
+                <li><Link to="/register">Register</Link></li>
+              </ul>
+            </nav>
+      }
     </header>
   );
 }

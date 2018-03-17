@@ -1,38 +1,86 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-function Register() {
-  return (
-    <div className="register-view">
-      <h2>Register Account:</h2>
+class Register extends Component {
+  constructor(props) {
+    super(props);
 
-      <form>
-        <div>
-          <label htmlFor="username">Username:</label>
-          <input type="text" id="username" />
-        </div>
+    this.registerUser = this.registerUser.bind(this);
+    this.prepareFormDataForSubmission = this.prepareFormDataForSubmission.bind(this);
+    this.onChange = this.onChange.bind(this);
 
-        <div>
-          <label htmlFor="fullName">Full Name:</label>
-          <input type="text" id="fullName" />
-        </div>
+    this.state = {
+      username: "",
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    };
+  }
 
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input type="email" id="email" />
-        </div>
+  onChange({ target }) {
+    this.setState({
+      [target.id]: target.value
+    });
+  }
 
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input type="password" id="password" />
-        </div>
+  prepareFormDataForSubmission(data = this.state) {
+    return {
+      FullName: data.fullName,
+      Email: data.email,
+      Password: data.password,
+      ConfirmPassword: data.confirmPassword
+    };
+  }
 
-         <div>
-          <label htmlFor="confirmPassword">Confirm Password:</label>
-          <input type="password" id="confirmPassword" />
-        </div>
-      </form>
-    </div>
-  );
+  registerUser(e) {
+    e.preventDefault();
+
+    const data = this.prepareFormDataForSubmission();
+
+    fetch('/api/account/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    })
+    .then(() => console.log("Success !"))
+    .catch(error => console.error(error));
+  }
+
+  render() {
+    const { fullName, email, password, confirmPassword } = this.state;
+
+    return (
+      <div className="register-view">
+        <h2>Register Account:</h2>
+
+        <form onSubmit={this.registerUser}>
+          <div>
+            <label htmlFor="fullName">Full Name:</label>
+            <input type="text" id="fullName" value={fullName} onChange={this.onChange} />
+          </div>
+
+          <div>
+            <label htmlFor="email">Email:</label>
+            <input type="email" id="email" value={email} onChange={this.onChange} />
+          </div>
+
+          <div>
+            <label htmlFor="password">Password:</label>
+            <input type="password" id="password" value={password} onChange={this.onChange} />
+          </div>
+
+           <div>
+            <label htmlFor="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" value={confirmPassword} onChange={this.onChange} />
+          </div>
+
+          <button type="submit">Register</button>
+        </form>
+      </div>
+    );
+  }
 }
 
 export default Register;

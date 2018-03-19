@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/images/bull.png';
-import utils from '../utils';
+import { authorizedRequest, isLoggedIn, getUserId } from '../utils';
 
 class Home extends Component {
   constructor(props) {
@@ -14,11 +14,11 @@ class Home extends Component {
     e.preventDefault();
     const { history } = this.props;
 
-    if (!utils.isLoggedIn()) {
+    if (!isLoggedIn()) {
       history.push('/login');
     }
 
-    utils.authorizedRequest("/api/game/startGameAgainstComputer")
+    authorizedRequest(`/api/players/${getUserId()}/newgame`)
       .then(response => response.json())
       .then(({ GameId }) => history.push({
         pathname: "/game",

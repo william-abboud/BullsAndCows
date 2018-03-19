@@ -90,8 +90,9 @@ namespace BullsAndCows.Web.Providers
         {
             IDictionary<string, string> data = new Dictionary<string, string>
             {
-                { "userName", user.UserName },
-                { "FullName", user.FullName },
+                { "UserName", user.UserName },
+                { "UserId", user.Id },
+                { "FullName", user.FullName }
             };
             return new AuthenticationProperties(data);
         }

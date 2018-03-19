@@ -1,6 +1,4 @@
-﻿using BullsAndCows.Web.Models;
-
-namespace BullsAndCows.Web.Controllers
+﻿namespace BullsAndCows.Web.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -8,6 +6,7 @@ namespace BullsAndCows.Web.Controllers
     using AutoMapper;
     using App_Data;
     using Dtos;
+    using Models;
     using Models.Providers;
 
     [Authorize]
@@ -22,41 +21,41 @@ namespace BullsAndCows.Web.Controllers
         
         public IHttpActionResult GetPlayers()
         {
-            var players = Mapper.Map(context.Players.ToList(), new List<PlayerDto>());
+            var players = Mapper.Map(this.context.Players.ToList(), new List<PlayerDto>());
 
             return Ok(players);
         }
 
         public IHttpActionResult GetPlayer(string id)
         {
-            var playerInDb = context.Players.FirstOrDefault(p => p.PlayerId == id);
+            var player = this.context.GetPlayer(id);
 
-            if (playerInDb == null)
+            if (player == null)
             {
                 return NotFound();
             }
 
-            var player = Mapper.Map(playerInDb, new PlayerDto());
+            var result = Mapper.Map(player, new PlayerDto());
 
-            return Ok(player);
+            return Ok(result);
         }
 
         [HttpPost]
-        // TODO: QueryParams for secret and gameId
-        [Route("api/players/{playerId}/createSecret/{secret}/game/{gameId}")]
-        public IHttpActionResult CreateSecret(string playerId, int secret, int gameId)
+        [Route("api/players/{playerId}/game/{gameId}/createSecret/{secret}")]
+        public IHttpActionResult CreateSecret(string playerId, int gameId, int secret)
         {
-            var playerInDb = context.Players.FirstOrDefault(p => p.PlayerId == playerId);
+            var player = this.context.GetPlayer(playerId);
+            var game = this.context.GetGame(gameId);
 
-            if (playerInDb == null)
+            if (player == null || game == null)
             {
                 return NotFound();
             }
 
             var secretNumber = new SecretNumber
             {
-                GameId = gameId,
-                PlayerId = playerInDb.PlayerId,
+                Game = game,
+                Player = player,
                 Number = secret
             };
 
@@ -67,42 +66,46 @@ namespace BullsAndCows.Web.Controllers
         }
 
         [HttpPost]
-        // TODO: QueryParams for secret and gameId
-        [Route("api/players/{playerId}/guessSecret/{secret}/{gameId}")]
-        public IHttpActionResult GuessSecret(string playerId, int guess, int gameId)
+        [Route("api/players/{playerId}/game/{gameId}/guessSecret/{guess}")]
+        public IHttpActionResult GuessSecret(string playerId, int gameId, int guess)
         {
-            var playerInDb = context.Players.FirstOrDefault(p => p.PlayerId == playerId);
-            var gameInDb = context.Games.FirstOrDefault(g => g.GameId == gameId);
+            var playerInDb = this.context.GetPlayer(playerId);
+            var gameInDb = this.context.GetGame(gameId);
 
             if (playerInDb == null || gameInDb == null)
             {
                 return NotFound();
             }
 
-            var opponent = gameInDb.PlayerOneId == playerId ? gameInDb.PlayerTwo : gameInDb.PlayerOne;
-
+            var opponent = this.context.GetOpponentPlayer(playerInDb, gameInDb);
             opponent.SecretNumberProvider = new DbSecretNumberProvider(gameId, opponent.PlayerId);
 
             var result = opponent.CheckGuess(guess);
+            var guessResult = new GuessResult
+            {
+                Bulls = result.Bulls,
+                Cows = result.Cows
+            };
+
             var round = new Round
             {
-                GameId = gameId,
-                PlayerId = playerId,
-                BullsGuessed = result.Bulls,
-                CowsGuessed = result.Cows
+                Game = gameInDb,
+                Player = playerInDb,
+                BullsGuessed = guessResult.Bulls,
+                CowsGuessed = guessResult.Cows
             };
 
             this.context.Rounds.Add(round);
             context.SaveChanges();
 
-            return Ok(result);
+            return Ok(guessResult);
         }
 
         [Route("api/players/top")]
         [AllowAnonymous]
         public IHttpActionResult GetTopPlayers(int limit = 25)
         {
-            var topPlayers = context.Players
+            var topPlayers = this.context.Players
                 .OrderByDescending(p => p.Score)
                 .Take(limit)
                 .ToList();

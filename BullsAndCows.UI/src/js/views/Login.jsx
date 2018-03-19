@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
-import utils from '../utils';
+import { setAccessToken, setUserId, setUser, isLoggedIn } from '../utils';
 
 class Login extends Component {
   constructor(props) {
@@ -12,12 +12,8 @@ class Login extends Component {
     this.state = {
       email: '',
       password: '',
-      loggedIn: false,
+      loggedIn: isLoggedIn(),
     };
-  }
-
-  componentDidMount() {
-    this.setState({ loggedIn: utils.isLoggedIn() });
   }
 
   login(e) {
@@ -33,8 +29,9 @@ class Login extends Component {
     })
     .then(response => response.json())
     .then(res => {
-      utils.setAccessToken(res["access_token"]);
-      window.localStorage.setItem("user", res.FullName);
+      setAccessToken(res["access_token"]);
+      setUser(res.FullName);
+      setUserId(res.UserId);
     })
     .then(() => this.setState({ loggedIn: true }))
     .catch(error => console.error(error));

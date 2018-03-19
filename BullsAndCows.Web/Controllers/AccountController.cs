@@ -1,8 +1,6 @@
-﻿using AutoMapper;
-using BullsAndCows.Web.Models.Providers;
-
-namespace BullsAndCows.Web.Controllers
+﻿namespace BullsAndCows.Web.Controllers
 {
+    using AutoMapper;
     using Dtos;
     using System;
     using System.Collections.Generic;

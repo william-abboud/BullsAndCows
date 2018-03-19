@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
-import utils from '../utils';
+import { getAccessToken, authorizedRequest, getUserId } from '../utils';
 import queryString from 'query-string';
 
 class SecretNumberForm extends Component {
@@ -18,7 +18,10 @@ class SecretNumberForm extends Component {
   submitSecret(e) {
     e.preventDefault();
 
-    utils.authorizedRequest(`/api/Players/CreateSecret/${this.state.secret}`, "POST");
+    const { gameId } = this.props;
+    const { secret } = this.state;
+
+    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/createSecret/${secret}`, "POST");
   }
 
   onFormValueChange({ target }) {
@@ -42,6 +45,7 @@ class SecretNumberForm extends Component {
   }
 }
 
+/* ТODO: Fix getting game Id */
 class Game extends Component {
   constructor(props) {
     super(props);
@@ -52,14 +56,14 @@ class Game extends Component {
   }
 
   render() {
-    if (!utils.getAccessToken()) {
+    if (!getAccessToken()) {
       return <Redirect to="/login" />;
     }
 
     return (
       <div className="game-view">
         <h2>Create a secret number:</h2>
-        <SecretNumberForm />
+        <SecretNumberForm gameId={this.state.gameId} />
       </div>
     );
   }

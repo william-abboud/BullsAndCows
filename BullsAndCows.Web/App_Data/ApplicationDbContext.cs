@@ -55,7 +55,22 @@
 
         public Player GetComputerPlayer()
         {
-            return this.Players.FirstOrDefault();
+            return this.Players.FirstOrDefault(p => p.Name == "Computer" && p.PlayerId == "0");
+        }
+
+        public Player GetPlayer(string id)
+        {
+            return this.Players.FirstOrDefault(p => p.PlayerId == id);
+        }
+
+        public Game GetGame(int id)
+        {
+            return this.Games.FirstOrDefault(g => g.GameId == id);
+        }
+
+        public Player GetOpponentPlayer(Player otherPlayer, Game game)
+        {
+            return game.PlayerOne == otherPlayer ? game.PlayerTwo : game.PlayerOne;
         }
     }
 }

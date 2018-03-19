@@ -1,8 +1,6 @@
 ﻿namespace BullsAndCows.Web.Controllers
 {
-    using System.Linq;
     using App_Data;
-    using Microsoft.AspNet.Identity;
     using System.Web.Http;
     using Models;
 
@@ -18,10 +16,10 @@
 
         [HttpGet]
         [Route("api/players/{playerId}/newgame")]
-        public IHttpActionResult StartGameAgainstComputer(string playerId)
+        public IHttpActionResult NewGame(string playerId)
         {
             var computerPlayer = this.context.GetComputerPlayer();
-            var player = this.context.Players.FirstOrDefault(p => p.PlayerId == playerId);
+            var player = this.context.GetPlayer(playerId);
 
             if (player == null)
             {

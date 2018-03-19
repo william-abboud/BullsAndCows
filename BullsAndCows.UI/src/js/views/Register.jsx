@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import utils from '../utils';
 
 class Register extends Component {
   constructor(props) {
@@ -9,7 +10,6 @@ class Register extends Component {
     this.onChange = this.onChange.bind(this);
 
     this.state = {
-      username: "",
       fullName: "",
       email: "",
       password: "",
@@ -37,15 +37,9 @@ class Register extends Component {
 
     const data = this.prepareFormDataForSubmission();
 
-    fetch('/api/account/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    })
-    .then(() => console.log("Success !"))
-    .catch(error => console.error(error));
+    utils.request("/api/account/register", "POST", data)
+      .then(() => this.props.history.push("/login"))
+      .catch(error => console.error(error));
   }
 
   render() {

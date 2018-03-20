@@ -1,6 +1,4 @@
-﻿using BullsAndCows.Web.Models.Utils;
-
-namespace BullsAndCows.Web.Controllers
+﻿namespace BullsAndCows.Web.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -10,6 +8,8 @@ namespace BullsAndCows.Web.Controllers
     using Dtos;
     using Models;
     using Models.Providers;
+    using Models.Utils;
+    using ViewModels;
 
     [Authorize]
     public class PlayersController : ApiController
@@ -81,6 +81,7 @@ namespace BullsAndCows.Web.Controllers
             return Ok();
         }
 
+        /* TODO: CLEAN UP CODE HERE */
         [HttpPost]
         [Route("api/players/{playerId}/game/{gameId}/guessSecret/{guess}")]
         public IHttpActionResult GuessSecret(string playerId, int gameId, int guess)
@@ -96,20 +97,57 @@ namespace BullsAndCows.Web.Controllers
             var opponent = this.context.GetOpponentPlayer(playerInDb, gameInDb);
             opponent.SecretNumberProvider = new DbSecretNumberProvider(gameId, opponent.PlayerId);
 
-            var guessResult = opponent.CheckGuess(guess);
-
-            var round = new Round
+            var playerGuessResult = opponent.CheckGuess(guess);
+            var playerGuessViewModel = new PlayerGuessResultViewModel()
+            {
+                PlayerId = playerInDb.PlayerId,
+                BullsGuessed = playerGuessResult.Bulls,
+                CowsGuessed = playerGuessResult.Cows,
+                Guess = guess
+            };
+            this.context.PlayerGuessResults.Add(new PlayerGuessResult()
             {
                 Game = gameInDb,
                 Player = playerInDb,
-                BullsGuessed = guessResult.Bulls,
-                CowsGuessed = guessResult.Cows
-            };
+                BullsGuessed = playerGuessResult.Bulls,
+                CowsGuessed = playerGuessResult.Cows
+            });
 
-            this.context.Rounds.Add(round);
-            context.SaveChanges();
+            PlayerGuessResultViewModel computerGuessResultViewModel = null;
 
-            return Ok(guessResult);
+            if (opponent == this.context.GetComputerPlayer())
+            {
+                playerInDb.SecretNumberProvider = new DbSecretNumberProvider(gameId, playerId);
+                var computerGuess = SecretNumberGenerator.GenerateUniqueSecretNumber(4);
+                var opponentGuessResult = playerInDb.CheckGuess(computerGuess);
+                computerGuessResultViewModel = new PlayerGuessResultViewModel()
+                {
+                    PlayerId = opponent.PlayerId,
+                    BullsGuessed = opponentGuessResult.Bulls,
+                    CowsGuessed = opponentGuessResult.Cows,
+                    Guess = computerGuess
+                };
+                this.context.PlayerGuessResults.Add(new PlayerGuessResult()
+                {
+                    Game = gameInDb,
+                    Player = playerInDb,
+                    BullsGuessed = opponentGuessResult.Bulls,
+                    CowsGuessed = opponentGuessResult.Cows
+                });
+            }
+
+            this.context.SaveChanges();
+
+            var guessResultViewModel = new GuessResultViewModel();
+
+            guessResultViewModel.GuessResults.Add(playerGuessViewModel);
+
+            if (computerGuessResultViewModel != null)
+            {
+                guessResultViewModel.GuessResults.Add(computerGuessResultViewModel);
+            }
+
+            return Ok(guessResultViewModel);
         }
 
         [Route("api/players/top")]

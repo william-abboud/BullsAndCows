@@ -19,13 +19,13 @@
 
         public virtual Player PlayerTwo { get; set; }
 
-        public virtual ICollection<Round> Rounds { get; set; }
+        public virtual ICollection<PlayerGuessResult> PlayerGuessResults { get; set; }
 
         public virtual ICollection<SecretNumber> SecretNumbers { get; set; }
 
         public Game()
         {
-            this.Rounds = new HashSet<Round>();
+            this.PlayerGuessResults = new HashSet<PlayerGuessResult>();
             this.SecretNumbers = new HashSet<SecretNumber>();
         }
     }

@@ -11,7 +11,7 @@
 
         public DbSet<Game> Games { get; set; }
 
-        public DbSet<Round> Rounds { get; set; }
+        public DbSet<PlayerGuessResult> PlayerGuessResults { get; set; }
 
         public DbSet<SecretNumber> SecretNumbers { get; set; }
 
@@ -37,9 +37,9 @@
                 .WithMany(p => p.GamesAsPlayerTwo)
                 .WillCascadeOnDelete(false);
 
-            modelBuilder.Entity<Round>()
+            modelBuilder.Entity<PlayerGuessResult>()
                 .HasRequired(r => r.Game)
-                .WithMany(g => g.Rounds)
+                .WithMany(g => g.PlayerGuessResults)
                 .WillCascadeOnDelete(false);
 
             modelBuilder.Entity<SecretNumber>()

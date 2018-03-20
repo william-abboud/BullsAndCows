@@ -3,12 +3,10 @@
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    public class Round
+    public class PlayerGuessResult
     {
         [Key]
         public int Id { get; set; }
-
-        public int RoundNumber { get; set; }
 
         public int BullsGuessed { get; set; }
 

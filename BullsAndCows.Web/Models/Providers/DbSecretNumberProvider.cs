@@ -19,8 +19,9 @@
 
         public int GetSecretNumber()
         {
-            var secretNumber = context.SecretNumbers.FirstOrDefault(
-                sn => sn.PlayerId == this.PlayerId && sn.GameId == this.GameId);
+            var secretNumber = this.context.SecretNumbers.FirstOrDefault(sn => 
+                sn.GameId == this.GameId &&
+                sn.Player.PlayerId == this.PlayerId);
 
             if (secretNumber != null)
             {

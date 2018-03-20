@@ -1,4 +1,6 @@
-﻿namespace BullsAndCows.Web.Controllers
+﻿using BullsAndCows.Web.Models.Utils;
+
+namespace BullsAndCows.Web.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -52,6 +54,20 @@
                 return NotFound();
             }
 
+            var opponent = this.context.GetOpponentPlayer(player, game);
+
+            if (opponent == this.context.GetComputerPlayer())
+            {
+                var secretNumberForComputer = new SecretNumber()
+                {
+                    Game = game,
+                    Player = opponent,
+                    Number = SecretNumberGenerator.GenerateUniqueSecretNumber(4)
+                };
+
+                this.context.SecretNumbers.Add(secretNumberForComputer);
+            }
+
             var secretNumber = new SecretNumber
             {
                 Game = game,
@@ -80,12 +96,7 @@
             var opponent = this.context.GetOpponentPlayer(playerInDb, gameInDb);
             opponent.SecretNumberProvider = new DbSecretNumberProvider(gameId, opponent.PlayerId);
 
-            var result = opponent.CheckGuess(guess);
-            var guessResult = new GuessResult
-            {
-                Bulls = result.Bulls,
-                Cows = result.Cows
-            };
+            var guessResult = opponent.CheckGuess(guess);
 
             var round = new Round
             {

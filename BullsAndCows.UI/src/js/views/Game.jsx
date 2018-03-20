@@ -21,7 +21,8 @@ class SecretNumberForm extends Component {
     const { gameId } = this.props;
     const { secret } = this.state;
 
-    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/createSecret/${secret}`, "POST");
+    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/createSecret/${secret}`, "POST")
+      .then(() => this.props.onSecretSubmit());
   }
 
   onFormValueChange({ target }) {
@@ -45,14 +46,63 @@ class SecretNumberForm extends Component {
   }
 }
 
+class GuessForm extends Component {
+  constructor(props) {
+    super(props);
+
+    this.onFormValueChange = this.onFormValueChange.bind(this);
+    this.submitGuess = this.submitGuess.bind(this);
+
+    this.state = {
+      guess: 0
+    };
+  }
+
+  submitGuess(e) {
+    e.preventDefault();
+
+    const { gameId } = this.props;
+    const { guess } = this.state;
+
+    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/guessSecret/${guess}`, "POST")
+      .then(response => response.json())
+      .then(guessResult => console.dir(guessResult))
+      .catch(error => console.error(error));
+  }
+
+  onFormValueChange({ target }) {
+    this.setState({
+      [target.id]: target.value
+    });
+  }
+
+  render() {
+    return (
+      <form onSubmit={this.submitGuess}>
+        <div>
+          <label htmlFor="guess">Guess Secret Number:</label>
+          <input type="text" id="guess" value={this.state.guess} onChange={this.onFormValueChange} />
+        </div>
+        <button type="submit">Guess</button>
+      </form>
+    );
+  }
+}
+
 /* ТODO: Fix getting game Id */
 class Game extends Component {
   constructor(props) {
     super(props);
 
+    this.showGuessForm = this.showGuessForm.bind(this);
     this.state = {
-      gameId: queryString.parse(this.props.location.search).gameId
+      gameId: queryString.parse(this.props.location.search).gameId,
+      guessFormHidden: true,
     };
+  }
+
+  showGuessForm() {
+    this.setState({ guessFormHidden: false });
   }
 
   render() {
@@ -62,8 +112,13 @@ class Game extends Component {
 
     return (
       <div className="game-view">
-        <h2>Create a secret number:</h2>
-        <SecretNumberForm gameId={this.state.gameId} />
+        {
+          this.state.guessFormHidden
+            ?
+              <SecretNumberForm gameId={this.state.gameId} onSecretSubmit={this.showGuessForm} />
+            :
+              <GuessForm gameId={this.state.gameId} />
+        }
       </div>
     );
   }

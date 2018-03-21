@@ -27,14 +27,20 @@ class Login extends Component {
       },
       body: `grant_type=password&username=${email}&password=${password}`
     })
-    .then(response => response.json())
-    .then(res => {
-      setAccessToken(res["access_token"]);
-      setUser(res.FullName);
-      setUserId(res.UserId);
-    })
-    .then(() => this.setState({ loggedIn: true }))
-    .catch(error => console.error(error));
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
+
+        return response.json();
+      })
+      .then((response) => {
+        setAccessToken(response.access_token);
+        setUser(response.FullName);
+        setUserId(response.UserId);
+      })
+      .then(() => this.setState({ loggedIn: true }))
+      .catch(error => console.error(error));
   }
 
   onFormValueChange({ target }) {
@@ -55,12 +61,23 @@ class Login extends Component {
         <form onSubmit={this.login}>
           <div>
             <label htmlFor="email">Email:</label>
-            <input type="email" id="email" onChange={this.onFormValueChange} />
+            <input
+              type="email"
+              id="email"
+              onChange={this.onFormValueChange}
+              required
+            />
           </div>
 
           <div>
             <label htmlFor="password">Password:</label>
-            <input type="password" id="password" onChange={this.onFormValueChange} />
+            <input
+              type="password"
+              id="password"
+              onChange={this.onFormValueChange}
+              minLength="5"
+              required
+            />
           </div>
 
           <button type="submit">Submit</button>

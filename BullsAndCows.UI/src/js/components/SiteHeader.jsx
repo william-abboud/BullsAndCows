@@ -1,6 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import utils from '../utils';
+import { isLoggedIn, getUser, removeAccessToken } from '../utils';
+
+function logOut() {
+  removeAccessToken();
+  window.location.hash = "#/login";
+}
 
 function SiteHeader() {
   return (
@@ -14,9 +19,12 @@ function SiteHeader() {
       </nav>
 
       {
-        utils.isLoggedIn()
+        isLoggedIn()
           ?
-            <div>{`Welcome ${utils.getUser()} !`}</div>
+            <div className="account-section">
+              {`Welcome ${getUser()} !`}
+              <button onClick={logOut}>Logout</button>
+            </div>
           :
             <nav className="login-register-nav">
               <ul>
@@ -24,7 +32,7 @@ function SiteHeader() {
                 <li><Link to="/register">Register</Link></li>
               </ul>
             </nav>
-      }
+        }
     </header>
   );
 }

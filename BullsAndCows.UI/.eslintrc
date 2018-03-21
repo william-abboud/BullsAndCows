@@ -18,6 +18,13 @@
     "eol-last": "off",
     "object-curly-newline": "off",
     "jsx-a11y/anchor-is-valid": "off",
+    "jsx-a11y/label-has-for": [ 2, {
+        "components": [ "Label" ],
+        "required": {
+            "every": [ "id" ]
+        },
+        "allowChildren": false
+    }],
     "quote-props": "off",
     "spaced-comment": "off",
     "no-restricted-syntax": "off",
@@ -25,5 +32,7 @@
     "react/sort-comp": "off",
     "no-underscore-dangle": "off",
     "array-bracket-spacing": "off",
+    "no-extra-boolean-cast": "off",
+    "react/jsx-curly-brace-presence": "off"
   }
 }

@@ -4,9 +4,29 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid transparentize($white-500, .5);
+
+  .account-section {
+    button {
+      padding: 5px 10px;
+      font-size: 20px;
+      margin-left: 10px;
+    }
+  }
 
   nav a {
     padding-bottom: 2px;
+    font-size: 2em;
+  }
+
+  @media all and (max-width: 800px) {
+    flex-flow: column wrap;
+    align-items: flex-start;
+    justify-content: center;
+
+    ul {
+      display: flex;
+      flex-flow: column wrap;
+    }
   }
 }

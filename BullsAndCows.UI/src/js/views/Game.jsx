@@ -1,127 +1,170 @@
 import React, { Component } from 'react';
-import { Redirect } from 'react-router';
-import { getAccessToken, authorizedRequest, getUserId } from '../utils';
+import { object } from 'prop-types';
+import { authorizedRequest, getUserId, isLoggedIn } from '../utils';
 import queryString from 'query-string';
+import SecretNumberForm from '../components/SecretNumberForm';
+import GuessForm from '../components/GuessForm';
 
-class SecretNumberForm extends Component {
-  constructor(props) {
-    super(props);
-
-    this.submitSecret = this.submitSecret.bind(this);
-    this.onFormValueChange = this.onFormValueChange.bind(this);
-
-    this.state = {
-      secret: 0
-    };
-  }
-
-  submitSecret(e) {
-    e.preventDefault();
-
-    const { gameId } = this.props;
-    const { secret } = this.state;
-
-    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/createSecret/${secret}`, "POST")
-      .then(() => this.props.onSecretSubmit());
-  }
-
-  onFormValueChange({ target }) {
-    this.setState({
-      [target.id]: target.value
-    });
-  }
-
-  render() {
-    const { playerName } = this.props;
-
-    return (
-      <form onSubmit={this.submitSecret}>
-        <div>
-          <label htmlFor="secret">Secret Number:</label>
-          <input type="text" id="secret" value={this.state.secret} onChange={this.onFormValueChange} />
-        </div>
-        <button type="submit">Submit Secret</button>
-      </form>
-    );
-  }
+function PlayerGuessResult({ guessResult }) {
+  return (
+    <div className="guess-result">
+      <div className="guess">Guess: {guessResult.Guess}</div>
+      <div className="cows">Cows: {guessResult.CowsGuessed}</div>
+      <div className="bulls">Bulls: {guessResult.BullsGuessed}</div>
+      {
+        guessResult.HasGameFinished
+          ? <div className="winner">Winner: {guessResult.Winner} !</div>
+          : null
+      }
+    </div>
+  );
 }
 
-class GuessForm extends Component {
-  constructor(props) {
-    super(props);
+PlayerGuessResult.propTypes = {
+  guessResult: object.isRequired
+};
 
-    this.onFormValueChange = this.onFormValueChange.bind(this);
-    this.submitGuess = this.submitGuess.bind(this);
-
-    this.state = {
-      guess: 0
-    };
-  }
-
-  submitGuess(e) {
-    e.preventDefault();
-
-    const { gameId } = this.props;
-    const { guess } = this.state;
-
-    authorizedRequest(`/api/players/${getUserId()}/game/${gameId}/guessSecret/${guess}`, "POST")
-      .then(response => response.json())
-      .then(guessResult => console.dir(guessResult))
-      .catch(error => console.error(error));
-  }
-
-  onFormValueChange({ target }) {
-    this.setState({
-      [target.id]: target.value
-    });
-  }
-
-  render() {
-    return (
-      <form onSubmit={this.submitGuess}>
-        <div>
-          <label htmlFor="guess">Guess Secret Number:</label>
-          <input type="text" id="guess" value={this.state.guess} onChange={this.onFormValueChange} />
-        </div>
-        <button type="submit">Guess</button>
-      </form>
-    );
-  }
-}
-
-/* ТODO: Fix getting game Id */
 class Game extends Component {
   constructor(props) {
     super(props);
 
-    this.showGuessForm = this.showGuessForm.bind(this);
+    this.storeGuessResults = this.storeGuessResults.bind(this);
+    this.getGameInfo = this.getGameInfo.bind(this);
+    this.startGame = this.startGame.bind(this);
+    this.continueGame = this.continueGame.bind(this);
+
     this.state = {
-      gameId: queryString.parse(this.props.location.search).gameId,
-      guessFormHidden: true,
+      game: {
+        GameId: "",
+        SecretNumber: "",
+        HasFinished: "",
+        GuessResults: [],
+      }
     };
   }
 
-  showGuessForm() {
-    this.setState({ guessFormHidden: false });
+  componentDidMount() {
+    const { history, location } = this.props;
+    const { newGame } = queryString.parse(location.search);
+
+    if (!isLoggedIn()) {
+      history.push("/login");
+    }
+
+    if (newGame === "true") {
+      this.startGame();
+    } else {
+      this.continueGame();
+    }
+  }
+
+  startGame() {
+    return authorizedRequest(`/api/players/${getUserId()}/newgame`, "POST")
+      .then(response => response.json())
+      .then(game => this.setState({ game }))
+      .then(() => this.props.history.push({
+        pathname: '/game',
+        search: "?newGame=false"
+      }))
+      .catch(err => console.error(err));
+  }
+
+  continueGame() {
+    return authorizedRequest(`/api/players/${getUserId()}/continueGame`, "POST")
+      .then(response => response.json())
+      .then(game => this.setState({ game }))
+      .catch(error => console.error(error));
+  }
+
+  getGameInfo() {
+    return authorizedRequest(`/api/players/${getUserId()}/game/${this.state.game.GameId}`)
+      .then(response => response.json())
+      .then(game => this.setState({ game }))
+      .catch(error => console.error(error));
+  }
+
+  storeGuessResults(newGuessResults) {
+    const existingGame = this.state.game;
+    const existingResults = existingGame.GuessResults;
+    const newGameState = {
+      ...existingGame,
+      GuessResults: [...existingResults, ...newGuessResults]
+    };
+
+    if (newGuessResults.filter(result => result.HasGameFinished).length) {
+      newGameState.HasFinished = true;
+    }
+
+    this.setState({ game: newGameState });
   }
 
   render() {
-    if (!getAccessToken()) {
-      return <Redirect to="/login" />;
-    }
+    const { game } = this.state;
 
     return (
       <div className="game-view">
         {
-          this.state.guessFormHidden
+          !Boolean(game.SecretNumber)
             ?
-              <SecretNumberForm gameId={this.state.gameId} onSecretSubmit={this.showGuessForm} />
+              <SecretNumberForm gameId={game.GameId} onSecretSubmit={this.getGameInfo} />
             :
-              <GuessForm gameId={this.state.gameId} />
+              <div className="players-summary">
+                <div className="player-summary">
+                  <h2>Your Secret Number: {game.SecretNumber}</h2>
+                  <h2>Your Guesses:</h2>
+                  <GuessForm
+                    gameId={game.GameId}
+                    onGuessResults={this.storeGuessResults}
+                    disabled={game.HasFinished}
+                  />
+                </div>
+                <div className="opponent-player-summary">
+                  <h2>{"Opponent's Guesses:"}</h2>
+                </div>
+              </div>
+        }
+
+        <hr />
+
+        {
+          Array.isArray(game.GuessResults)
+            ?
+              <div className="player-results-wrapper">
+                <div className="player-results">
+                  {
+                    game.GuessResults
+                      .filter(gs => gs.PlayerId === getUserId())
+                      .map(guessResult => (
+                        <PlayerGuessResult
+                          key={guessResult.PlayerId + guessResult.Guess}
+                          guessResult={guessResult}
+                        />
+                      ))
+                  }
+                </div>
+                <div className="player-results">
+                  {
+                    game.GuessResults
+                      .filter(gs => gs.PlayerId !== getUserId())
+                      .map(guessResult => (
+                        <PlayerGuessResult
+                          key={guessResult.PlayerId + guessResult.Guess}
+                          guessResult={guessResult}
+                        />
+                      ))
+                  }
+                </div>
+              </div>
+            : null
         }
       </div>
     );
   }
 }
+
+Game.propTypes = {
+  location: object.isRequired,
+  history: object.isRequired
+};
 
 export default Game;

@@ -1,20 +1,13 @@
 ﻿namespace BullsAndCows.Web.Models
 {
+    using Utils;
     using System.ComponentModel.DataAnnotations.Schema;
     using Interfaces;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Linq;
 
     public class Player : IPlayer
     {
-        private static List<int> ConvertNumToList(int number)
-        {
-            return number.ToString()
-                .Select(digit => (int)char.GetNumericValue(digit))
-                .ToList();
-        }
-
         public ISecretNumberProvider SecretNumberProvider { private get; set; }
 
         [Key]
@@ -46,8 +39,8 @@
         public IGuessResult CheckGuess(int guess)
         {
             var guessResult = new GuessResult();
-            var guessList = ConvertNumToList(guess);
-            var secretNumberList = ConvertNumToList(this.SecretNumberProvider.GetSecretNumber());
+            var guessList = NumToListConverter.Convert(guess);
+            var secretNumberList = NumToListConverter.Convert(this.SecretNumberProvider.GetSecretNumber());
 
             for (int i = 0; i < secretNumberList.Count; i++)
             {

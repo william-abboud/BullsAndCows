@@ -1,6 +1,8 @@
-﻿namespace BullsAndCows.Web
+﻿
+namespace BullsAndCows.Web
 {
     using Models;
+    using ViewModels;
     using System.Web.Http;
     using System.Web.Mvc;
     using System.Web.Routing;
@@ -20,6 +22,8 @@
             {
                 cfg.CreateMap<Player, PlayerDto>();
                 cfg.CreateMap<PlayerDto, Player>();
+                cfg.CreateMap<PlayerGuessResultViewModel, PlayerGuessResult>();
+                cfg.CreateMap<PlayerGuessResult, PlayerGuessResultViewModel>();
             });
          }
     }

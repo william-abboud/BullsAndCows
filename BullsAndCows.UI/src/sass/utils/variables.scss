@@ -1,0 +1,12 @@
+$white-500: #F7FAFC;
+$orange-500: #FFA242;
+$red-500: #d50000;
+$blue-500: #058ED9;
+$black-500: #000;
+
+$font-family-default: "Luckiest Guy", sans-serif, Arial;
+$font-size-large: 7em;
+$font-size-medium: $font-size-large / 1.8;
+$font-size-small: $font-size-medium / 2;
+
+$box-shadow-default: 1px 3px 10px transparentize($black-500, .8);

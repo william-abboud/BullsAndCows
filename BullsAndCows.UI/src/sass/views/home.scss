@@ -1,6 +1,20 @@
 .home-view {
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
+  @include flex-col;
+
+  .start-game-trigger {
+    font-size: 45px;
+  }
+
+  .continue-game-trigger {
+    font-size: 35px;
+  }
+
+  .game-title {
+    margin-bottom: 0;
+  }
+
+  .bull-logo {
+    max-width: 300px;
+    margin-bottom: 10px;
+  }
 }

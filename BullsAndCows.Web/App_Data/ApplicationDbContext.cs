@@ -1,4 +1,6 @@
-﻿namespace BullsAndCows.Web.App_Data
+﻿using System.Collections.Generic;
+
+namespace BullsAndCows.Web.App_Data
 {
     using System.Linq;
     using System.Data.Entity;
@@ -55,7 +57,7 @@
 
         public Player GetComputerPlayer()
         {
-            return this.Players.FirstOrDefault(p => p.Name == "Computer" && p.PlayerId == "0");
+            return this.Players.FirstOrDefault(p => p.Name == "Computer");
         }
 
         public Player GetPlayer(string id)
@@ -63,14 +65,29 @@
             return this.Players.FirstOrDefault(p => p.PlayerId == id);
         }
 
+        public Player GetOpponentPlayer(Player otherPlayer, Game game)
+        {
+            return game.PlayerOne == otherPlayer ? game.PlayerTwo : game.PlayerOne;
+        }
+
         public Game GetGame(int id)
         {
             return this.Games.FirstOrDefault(g => g.GameId == id);
         }
 
-        public Player GetOpponentPlayer(Player otherPlayer, Game game)
+        public Game GetCurrentGameBeingPlayed(string playerId)
         {
-            return game.PlayerOne == otherPlayer ? game.PlayerTwo : game.PlayerOne;
+            return this.Games.FirstOrDefault(g => !g.HasFinished && !g.IsAbandoned);
+        }
+
+        public SecretNumber GetSecretNumber(string playerId, int gameId)
+        {
+            return this.SecretNumbers.FirstOrDefault(sn => sn.PlayerId == playerId && sn.GameId == gameId);
+        }
+
+        public ICollection<PlayerGuessResult> GetGuessResultsForGame(int gameId)
+        {
+            return this.Games.FirstOrDefault(g => g.GameId == gameId).PlayerGuessResults;
         }
     }
 }

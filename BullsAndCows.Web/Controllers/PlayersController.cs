@@ -48,6 +48,7 @@
         {
             var player = this.context.GetPlayer(playerId);
             var game = this.context.GetGame(gameId);
+            var secretLen = NumToListConverter.Convert(secret).Count;
 
             if (player == null || game == null)
             {
@@ -62,7 +63,7 @@
                 {
                     Game = game,
                     Player = opponent,
-                    Number = SecretNumberGenerator.GenerateUniqueSecretNumber(4)
+                    Number = SecretNumberGenerator.GenerateUniqueSecretNumber(secretLen)
                 };
 
                 this.context.SecretNumbers.Add(secretNumberForComputer);
@@ -81,70 +82,96 @@
             return Ok();
         }
 
-        /* TODO: CLEAN UP CODE HERE */
         [HttpPost]
         [Route("api/players/{playerId}/game/{gameId}/guessSecret/{guess}")]
         public IHttpActionResult GuessSecret(string playerId, int gameId, int guess)
         {
-            var playerInDb = this.context.GetPlayer(playerId);
-            var gameInDb = this.context.GetGame(gameId);
+            var player = this.context.GetPlayer(playerId);
+            var game = this.context.GetGame(gameId);
+            var guessLen = NumToListConverter.Convert(guess).Count;
 
-            if (playerInDb == null || gameInDb == null)
+            if (player == null || game == null)
             {
                 return NotFound();
             }
 
-            var opponent = this.context.GetOpponentPlayer(playerInDb, gameInDb);
+            var opponent = this.context.GetOpponentPlayer(player, game);
             opponent.SecretNumberProvider = new DbSecretNumberProvider(gameId, opponent.PlayerId);
 
             var playerGuessResult = opponent.CheckGuess(guess);
+            var hasFoundSecret = playerGuessResult.Bulls == guessLen;
+
+            if (hasFoundSecret)
+            {
+                game.Finish();
+                player.Score += 100;
+            }
+
             var playerGuessViewModel = new PlayerGuessResultViewModel()
             {
-                PlayerId = playerInDb.PlayerId,
+                PlayerId = player.PlayerId,
                 BullsGuessed = playerGuessResult.Bulls,
                 CowsGuessed = playerGuessResult.Cows,
-                Guess = guess
+                Guess = guess,
+                HasGameFinished = hasFoundSecret,
+                Winner = hasFoundSecret ? player.Name : null
             };
             this.context.PlayerGuessResults.Add(new PlayerGuessResult()
             {
-                Game = gameInDb,
-                Player = playerInDb,
+                Game = game,
+                Player = player,
                 BullsGuessed = playerGuessResult.Bulls,
-                CowsGuessed = playerGuessResult.Cows
+                CowsGuessed = playerGuessResult.Cows,
+                Guess = guess,
             });
 
             PlayerGuessResultViewModel computerGuessResultViewModel = null;
 
             if (opponent == this.context.GetComputerPlayer())
             {
-                playerInDb.SecretNumberProvider = new DbSecretNumberProvider(gameId, playerId);
-                var computerGuess = SecretNumberGenerator.GenerateUniqueSecretNumber(4);
-                var opponentGuessResult = playerInDb.CheckGuess(computerGuess);
-                computerGuessResultViewModel = new PlayerGuessResultViewModel()
+                if (!hasFoundSecret)
                 {
-                    PlayerId = opponent.PlayerId,
-                    BullsGuessed = opponentGuessResult.Bulls,
-                    CowsGuessed = opponentGuessResult.Cows,
-                    Guess = computerGuess
-                };
-                this.context.PlayerGuessResults.Add(new PlayerGuessResult()
-                {
-                    Game = gameInDb,
-                    Player = playerInDb,
-                    BullsGuessed = opponentGuessResult.Bulls,
-                    CowsGuessed = opponentGuessResult.Cows
-                });
+                    player.SecretNumberProvider = new DbSecretNumberProvider(gameId, playerId);
+                    var computerGuess = SecretNumberGenerator.GenerateUniqueSecretNumber(guessLen);
+                    var opponentGuessResult = player.CheckGuess(computerGuess);
+                    var hasGuessedSecret = playerGuessResult.Bulls == guessLen;
+
+                    if (hasGuessedSecret)
+                    {
+                        opponent.Score += 100;
+                        game.Finish();
+                    }
+
+                    computerGuessResultViewModel = new PlayerGuessResultViewModel()
+                    {
+                        PlayerId = opponent.PlayerId,
+                        BullsGuessed = opponentGuessResult.Bulls,
+                        CowsGuessed = opponentGuessResult.Cows,
+                        Guess = computerGuess,
+                        HasGameFinished = hasGuessedSecret,
+                        Winner = hasGuessedSecret ? opponent.Name : null
+                    };
+
+                    this.context.PlayerGuessResults.Add(new PlayerGuessResult()
+                    {
+                        Game = game,
+                        Player = opponent,
+                        BullsGuessed = opponentGuessResult.Bulls,
+                        CowsGuessed = opponentGuessResult.Cows,
+                        Guess = computerGuess
+                    });
+                }
             }
 
             this.context.SaveChanges();
 
-            var guessResultViewModel = new GuessResultViewModel();
+            var guessResultViewModel = new List<PlayerGuessResultViewModel>();
 
-            guessResultViewModel.GuessResults.Add(playerGuessViewModel);
+            guessResultViewModel.Add(playerGuessViewModel);
 
             if (computerGuessResultViewModel != null)
             {
-                guessResultViewModel.GuessResults.Add(computerGuessResultViewModel);
+                guessResultViewModel.Add(computerGuessResultViewModel);
             }
 
             return Ok(guessResultViewModel);

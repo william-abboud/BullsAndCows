@@ -1,41 +1,20 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/images/bull.png';
-import { authorizedRequest, isLoggedIn, getUserId } from '../utils';
 
-class Home extends Component {
-  constructor(props) {
-    super(props);
-
-    this.startGame = this.startGame.bind(this);
-  }
-
-  startGame(e) {
-    e.preventDefault();
-    const { history } = this.props;
-
-    if (!isLoggedIn()) {
-      history.push('/login');
-    }
-
-    authorizedRequest(`/api/players/${getUserId()}/newgame`)
-      .then(response => response.json())
-      .then(({ GameId }) => history.push({
-        pathname: "/game",
-        search: `?gameId=${GameId}`,
-      }))
-      .catch(err => console.error(err));
-  }
-
-  render() {
-    return (
-      <div className="home-view">
-        <img src={logo} alt="Cows and Bulls Logo" />
-        <h2>Cows and Bulls</h2>
-        <Link to="/game" onClick={this.startGame}>Play</Link>
-      </div>
-    );
-  }
+function Home() {
+  return (
+    <div className="home-view">
+      <h1 className="game-title">Cows and Bulls</h1>
+      <img src={logo} alt="Cows and Bulls Logo" className="bull-logo" />
+      <Link to={{ pathname: '/game', search: '?newGame=true' }} className="start-game-trigger">
+          Start new Game
+      </Link>
+      <Link to={{ pathname: '/game', search: '?newGame=false' }} className="continue-game-trigger">
+          Continue
+      </Link>
+    </div>
+  );
 }
 
 export default Home;

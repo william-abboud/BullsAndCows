@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { string, number } from 'prop-types';
 
 function PlayerTabularInfo({ rank, name, score }) {
   return (
@@ -9,6 +10,12 @@ function PlayerTabularInfo({ rank, name, score }) {
     </tr>
   );
 }
+
+PlayerTabularInfo.propTypes = {
+  rank: number.isRequired,
+  name: string.isRequired,
+  score: number.isRequired,
+};
 
 class Ranking extends Component {
   constructor(props) {
@@ -41,13 +48,14 @@ class Ranking extends Component {
             </tr>
           </thead>
           <tbody>
-            { topPlayers.map((player, i) =>
+            { topPlayers.map((player, i) => (
               <PlayerTabularInfo
-                name={ player.Name }
-                score={ player.Score }
+                key={player.Name + player.Score}
+                name={player.Name}
+                score={player.Score}
                 rank={i + 1}
               />
-            )}
+            ))}
           </tbody>
         </table>
       </div>

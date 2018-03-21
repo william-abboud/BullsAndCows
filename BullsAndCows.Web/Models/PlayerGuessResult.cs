@@ -8,6 +8,8 @@
         [Key]
         public int Id { get; set; }
 
+        public int Guess { get; set; }
+
         public int BullsGuessed { get; set; }
 
         public int CowsGuessed { get; set; }

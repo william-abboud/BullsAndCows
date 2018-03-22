@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
-using BullsAndCows.Web.App_Data;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin;
-using BullsAndCows.Web.Models;
-
-namespace BullsAndCows.Web
+﻿namespace BullsAndCows.Web
 {
+    using App_Data;
+    using Models;
+    using Microsoft.AspNet.Identity;
+    using Microsoft.AspNet.Identity.EntityFramework;
+    using Microsoft.AspNet.Identity.Owin;
+    using Microsoft.Owin;
+
     // Configure the application user manager used in this application. UserManager is defined in ASP.NET Identity and is used by the application.
 
     public class ApplicationUserManager : UserManager<ApplicationUser>

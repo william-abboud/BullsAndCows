@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-
-namespace BullsAndCows.Web.App_Data
+﻿namespace BullsAndCows.Web.App_Data
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Data.Entity;
     using Models;
@@ -57,7 +56,8 @@ namespace BullsAndCows.Web.App_Data
 
         public Player GetComputerPlayer()
         {
-            return this.Players.FirstOrDefault(p => p.Name == "Computer");
+            // Id of 0 hardcoded to be computer player from migrations
+            return this.GetPlayer("0");
         }
 
         public Player GetPlayer(string id)
@@ -67,6 +67,7 @@ namespace BullsAndCows.Web.App_Data
 
         public Player GetOpponentPlayer(Player otherPlayer, Game game)
         {
+            // Assumes only 2 players
             return game.PlayerOne == otherPlayer ? game.PlayerTwo : game.PlayerOne;
         }
 
@@ -87,7 +88,7 @@ namespace BullsAndCows.Web.App_Data
 
         public ICollection<PlayerGuessResult> GetGuessResultsForGame(int gameId)
         {
-            return this.Games.FirstOrDefault(g => g.GameId == gameId).PlayerGuessResults;
+            return this.Games.FirstOrDefault(g => g.GameId == gameId)?.PlayerGuessResults;
         }
     }
 }

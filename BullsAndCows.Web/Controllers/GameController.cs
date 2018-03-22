@@ -1,4 +1,7 @@
-﻿namespace BullsAndCows.Web.Controllers
+﻿using System.Net;
+using System.Net.Http;
+
+namespace BullsAndCows.Web.Controllers
 {
     using App_Data;
     using System.Web.Http;
@@ -23,6 +26,12 @@
         {
             var computerPlayer = this.context.GetComputerPlayer();
             var player = this.context.GetPlayer(playerId);
+
+            if (player == null)
+            {
+                return NotFound();
+            }
+
             var currentGame = this.context.GetCurrentGameBeingPlayed(player.PlayerId);
 
             currentGame?.Abandon();
@@ -45,6 +54,12 @@
         public IHttpActionResult ContinueGame(string playerId)
         {
             var player = this.context.GetPlayer(playerId);
+
+            if (player == null)
+            {
+                return NotFound();
+            }
+
             var game = this.context.GetCurrentGameBeingPlayed(player.PlayerId);
 
             if (game == null)
@@ -74,6 +89,12 @@
         public IHttpActionResult GetGameInfoForPlayer(string playerId, int gameId)
         {
             var player = this.context.GetPlayer(playerId);
+
+            if (player == null)
+            {
+                return NotFound();
+            }
+
             var game = this.context.GetGame(gameId);
 
             if (game == null)

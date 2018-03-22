@@ -38,15 +38,3 @@ export const authorizedRequest = (url, method = 'GET', body = {}) => {
     body: method !== "GET" ? JSON.stringify(body) : {},
   });
 };
-
-export default {
-  getAccessToken,
-  setAccessToken,
-  getUser,
-  setUser,
-  getUserId,
-  setUserId,
-  isLoggedIn,
-  request,
-  authorizedRequest,
-};

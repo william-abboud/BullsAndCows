@@ -1,5 +1,4 @@
-﻿
-namespace BullsAndCows.Web
+﻿namespace BullsAndCows.Web
 {
     using Models;
     using ViewModels;
